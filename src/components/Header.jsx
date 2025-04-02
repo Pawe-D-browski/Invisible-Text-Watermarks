@@ -9,7 +9,7 @@ export function Header() {
         <Card.Root borderRadius="3xl" variant="subtle">
           <Card.Body p={4}>
             <Stack direction="row" gap={4} align="center">
-              <Image src="./Invisible-Text-Watermarks/logo.svg" alt="Logo" boxSize="12" />
+              <Image src="/Invisible-Text-Watermarks/logo.svg" alt="Logo" boxSize="12" />
               <Box>
                 <Heading size="2xl" textAlign="center">
                   <Stack direction={{ base: "column", md: "row" }} gap={{ base: 0, md: 2 }} align="center">
