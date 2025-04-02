@@ -41,49 +41,6 @@ function encodeWatermark(text) {
   return result.join("");
 }
 
-function decodeWatermark(watermark) {
-  if (watermark.length % 8 !== 0) {
-    throw new Error("Watermark length is not a multiple of 8");
-  }
-
-  const byteArray = [];
-  for (let i = 0; i < watermark.length; i += 8) {
-    let byte = 0;
-    for (let j = 0; j < 8; j++) {
-      const char = watermark[i + j];
-      if (char === invisibleSpecialCharactersList[0]) {
-        byte = byte << 1;
-      } else if (char === invisibleSpecialCharactersList[1]) {
-        byte = (byte << 1) | 1;
-      } else {
-        throw new Error("Invalid character in watermark");
-      }
-    }
-    byteArray.push(byte);
-  }
-
-  const uint8Array = new Uint8Array(byteArray);
-  const decoder = new TextDecoder("utf-8");
-  return decoder.decode(uint8Array);
-}
-
-function extractWatermarks(text) {
-  const regex = "[" + invisibleSpecialCharactersList.join("") + "]{2,}";
-  return text.match(new RegExp(regex, "g")) || [];
-}
-
-function filterValidWatermarks(list) {
-  return list.filter((watermark) => watermark.length % 8 === 0);
-}
-
-function hasInvalidWatermark(list) {
-  return list.some((watermark) => watermark.length % 8 !== 0);
-}
-
-function removeDuplicateWatermarks(list) {
-  return [...new Set(list)];
-}
-
 function insertWatermark(watermark, text) {
   if (text === "") {
     return watermark;
@@ -110,7 +67,67 @@ function insertWatermark(watermark, text) {
 }
 
 function applyWatermark(watermark, text) {
-    return insertWatermark(encodeWatermark(normalizeText(watermark.trim())), normalizeText(text));
+  return insertWatermark(encodeWatermark(normalizeText(watermark.trim())), normalizeText(text));
 }
 
-export { applyWatermark };
+function decodeWatermark(watermark) {
+  const byteArray = [];
+  for (let i = 0; i < watermark.length; i += 8) {
+    let byte = 0;
+    for (let j = 0; j < 8; j++) {
+      const char = watermark[i + j];
+      if (char === invisibleSpecialCharactersList[0]) {
+        byte = byte << 1;
+      } else {
+        byte = (byte << 1) | 1;
+      }
+    }
+    byteArray.push(byte);
+  }
+
+  const uint8Array = new Uint8Array(byteArray);
+  const decoder = new TextDecoder("utf-8");
+  return decoder.decode(uint8Array);
+}
+
+function extractWatermarks(text) {
+  const regex = "[" + invisibleSpecialCharactersList.join("") + "]{2,}";
+  return text.match(new RegExp(regex, "g")) || [];
+}
+
+function filterValidWatermarks(list) {
+  return list.filter((watermark) => watermark.length % 8 === 0);
+}
+
+function filterInalidWatermarks(list) {
+  return list.filter((watermark) => watermark.length % 8 !== 0);
+}
+
+function hasInvalidWatermark(list) {
+  return list.some((watermark) => watermark.length % 8 !== 0);
+}
+
+function removeDuplicateWatermarks(list) {
+  return [...new Set(list)];
+}
+
+function getWatermarksWithStatus(text) {
+  const extractedWatermarks = extractWatermarks(text);
+  const uniqueWatermarks = removeDuplicateWatermarks(extractedWatermarks);
+  const validWatermarks = filterValidWatermarks(uniqueWatermarks);
+  const invalidCount = uniqueWatermarks.length - validWatermarks.length;
+
+  const decodedWatermarks = validWatermarks.map(watermark => {
+     return decodeWatermark(watermark);
+  }).filter(Boolean);
+
+  return {
+    decodedWatermarks,
+    status: {
+      valid: decodedWatermarks.length,
+      invalid: invalidCount
+    }
+  };
+}
+
+export { applyWatermark, getWatermarksWithStatus };

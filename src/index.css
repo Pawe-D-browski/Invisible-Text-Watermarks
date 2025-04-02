@@ -1,3 +1,5 @@
-html {
+@media (pointer: coarse) {
+  html {
     scrollbar-width: none;
+  }
 }
