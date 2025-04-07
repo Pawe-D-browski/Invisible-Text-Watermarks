@@ -3,3 +3,18 @@
     scrollbar-width: none;
   }
 }
+
+.player {
+  --video-brand: var(--chakra-colors-color-palette-solid);
+}
+
+.player:not([data-fullscreen]) {
+  border: 2px solid var(--chakra-colors-bg-emphasized);
+  border-radius: var(--chakra-radii-3xl);
+  --video-border: 2px solid var(--chakra-colors-bg-emphasized);
+  --video-border-radius: var(--chakra-radii-3xl);
+}
+
+.vds-poster {
+  border-radius: var(--chakra-radii-3xl);
+}
